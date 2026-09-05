@@ -1,0 +1,6 @@
+{
+  "name": "Gemini Reflection Journal",
+  "description": "A secure, user-authenticated reflection journal and RAG knowledge vault powered by Gemini 3.6 Flash and Cloud Firestore with strict anti-hallucination and user data isolation.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

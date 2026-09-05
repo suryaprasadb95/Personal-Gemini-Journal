@@ -138,12 +138,30 @@ The application includes a hybrid Retrieval-Augmented Generation (RAG) system:
 
 ---
 
-## 7. Security Architecture & Threat Model
+## 7. Voice Command & Audio Dictation Engine
+
+The application includes an in-browser Speech-to-Text and Hands-Free Voice Command engine using the Web Speech API and Web Audio API:
+- **Hands-Free Dictation**: Live real-time speech transcription directly into the reflection studio, retrieval sandbox, or knowledge doc editor.
+- **Dynamic Audio Visualizer**: Real-time equalizer bars measuring incoming audio level using Web Audio `AnalyserNode`.
+- **Trigger Phrase Recognition**:
+  - **"Send"** / **"Submit"**: Automatically triggers transmission of prompt to Gemini.
+  - **"Save Reflection"** / **"Save"**: Persists the session into Firestore without touching the keyboard.
+  - **"Clear Input"** / **"Clear"**: Resets the prompt buffer.
+  - **"New Reflection"** / **"Start New"**: Resets the studio for a fresh reflection.
+  - **"Toggle RAG"**: Instantly flips RAG Grounding ON or OFF.
+  - **"Switch to [Mode]"**: Switches reflection personas (e.g. Straight Talk, Deep Reflection, Brainstorm, Executive Summary).
+  - **"Stop Listening"**: Automatically mutes the microphone.
+- **Graceful Fallbacks**: Clear error guidance and browser capability detection for Chrome, Edge, and Safari with isolated frame microphone permissions configured.
+
+---
+
+## 8. Security Architecture & Threat Model
 
 | Threat Zone | Potential Risk | Countermeasure Implemented |
 | :--- | :--- | :--- |
-| **Input Surfaces** | Malicious injection in journal or knowledge inputs | Strict payload sanitization & defensive null-safe destructuring |
+| **Input Surfaces** | Malicious injection in journal, knowledge docs, or speech-to-text transcripts | Strict payload sanitization, plain-data boundaries, and defensive null-safe destructuring |
+| **Microphone & Audio** | Unauthorized audio recording or background listening | User-initiated microphone activation only (`isListening` state); automatic stream teardown on unmount or `stopListening()`; explicit `requestFramePermissions: ["microphone"]` |
 | **Planning & Reasoning** | System prompt escape / Hallucination | Plain-data boundaries, strict RAG grounding directives & anti-hallucination barriers |
-| **Tool & Execution** | API key leakage | Gemini API key kept strictly server-side in Express proxy |
+| **Tool & Execution** | API key leakage | Gemini API key kept strictly server-side in Express proxy (`server.ts`) |
 | **Memory & State** | Cross-user journal & knowledge leaks | Owner-bound Firestore path security (`request.auth.uid == userId`) for entries & knowledge docs |
 | **Inter-System Comms** | Upstream Gemini downtime | Resilient model fallback ladder (`gemini-3.6-flash` &rarr; `gemini-3.1-flash-lite` &rarr; `gemini-flash-latest` &rarr; `gemini-3.7-flash`) |
